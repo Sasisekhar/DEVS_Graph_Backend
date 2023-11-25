@@ -1,0 +1,247 @@
+{
+    "top": {
+        "name": "top_model",
+        "out_port": "output"
+    },
+    "atomic": [
+        {
+            "name": "Lobby",
+            "initial_state": "idle",
+            "inports": [
+                {
+                    "name": "in1",
+                    "type": "int"
+                }
+            ],
+            "outports": [
+                {
+                    "name": "out1",
+                    "type": "int"
+                },
+                {
+                    "name": "out2",
+                    "type": "int"
+                }
+            ],
+            "states": {
+                "idle": "inf",
+                "bar": 5,
+                "table": 7
+            },
+            "internal_transitions": [
+                {
+                    "curr_state": "bar",
+                    "new_state": "idle"
+                },
+                {
+                    "curr_state": "table",
+                    "new_state": "idle"
+                }
+            ],
+            "external_transitions": [
+                {
+                    "port": "in1",
+                    "value": "1",
+                    "curr_state": "idle",
+                    "new_state": "bar"
+                },
+                {
+                    "port": "in1",
+                    "value": "2",
+                    "curr_state": "idle",
+                    "new_state": "table"
+                }
+            ],
+            "output": [
+                {
+                    "curr_state": "bar",
+                    "port": "out1",
+                    "value": "1"
+                },
+                {
+                    "curr_state": "table",
+                    "port": "out2",
+                    "value": "1"
+                }
+            ]
+        },
+        {
+            "name": "Bar",
+            "initial_state": "idle",
+            "inports": [
+                {
+                    "name": "in4",
+                    "type": "int"
+                }
+            ],
+            "outports": [
+                {
+                    "name": "out3",
+                    "type": "int"
+                }
+            ],
+            "states": {
+                "idle": "inf",
+                "ready": 4
+            },
+            "internal_transitions": [
+                {
+                    "curr_state": "ready",
+                    "new_state": "idle"
+                }
+            ],
+            "external_transitions": [
+                {
+                    "port": "in4",
+                    "value": "1",
+                    "curr_state": "idle",
+                    "new_state": "ready"
+                }
+            ],
+            "output": [
+                {
+                    "curr_state": "ready",
+                    "port": "out3",
+                    "value": "2"
+                }
+            ]
+        },
+        {
+            "name": "Table",
+            "initial_state": "idle",
+            "inports": [
+                {
+                    "name": "in5",
+                    "type": "int"
+                }
+            ],
+            "outports": [
+                {
+                    "name": "out4",
+                    "type": "int"
+                }
+            ],
+            "states": {
+                "idle": "inf",
+                "ready": 15
+            },
+            "internal_transitions": [
+                {
+                    "curr_state": "ready",
+                    "new_state": "idle"
+                }
+            ],
+            "external_transitions": [
+                {
+                    "port": "in5",
+                    "value": "1",
+                    "curr_state": "idle",
+                    "new_state": "ready"
+                }
+            ],
+            "output": [
+                {
+                    "curr_state": "ready",
+                    "port": "out4",
+                    "value": "3"
+                }
+            ]
+        }
+    ],
+    "coupled": [
+        {
+            "name": "Restaurant",
+            "components": [
+                "Bar",
+                "Table"
+            ],
+            "inports": [
+                {
+                    "name": "in2",
+                    "type": "int"
+                },
+                {
+                    "name": "in3",
+                    "type": "int"
+                }
+            ],
+            "outports": [
+                {
+                    "name": "out5",
+                    "type": "int"
+                }
+            ],
+            "couplings": [
+                {
+                    "from_model": "",
+                    "to_model": "Bar",
+                    "from_port": "in2",
+                    "to_port": "in4"
+                },
+                {
+                    "from_model": "",
+                    "to_model": "Table",
+                    "from_port": "in3",
+                    "to_port": "in5"
+                },
+                {
+                    "from_model": "Bar",
+                    "to_model": "",
+                    "from_port": "out3",
+                    "to_port": "out5"
+                },
+                {
+                    "from_model": "Table",
+                    "to_model": "",
+                    "from_port": "out4",
+                    "to_port": "out5"
+                }
+            ]
+        },
+        {
+            "name": "top_model",
+            "components": [
+                "Lobby",
+                "Restaurant",
+                "IEStream"
+            ],
+            "top": {
+                "name": "top_model",
+                "out_port": "output"
+            },
+            "inports": [],
+            "outports": [
+                {
+                    "name": "output",
+                    "type": "int"
+                }
+            ],
+            "couplings": [
+                {
+                    "from_model": "Lobby",
+                    "to_model": "Restaurant",
+                    "from_port": "out1",
+                    "to_port": "in2"
+                },
+                {
+                    "from_model": "Lobby",
+                    "to_model": "Restaurant",
+                    "from_port": "out2",
+                    "to_port": "in3"
+                },
+                {
+                    "from_model": "IEStream",
+                    "to_model": "Lobby",
+                    "from_port": "out",
+                    "to_port": "in1"
+                },
+                {
+                    "from_model": "Restaurant",
+                    "to_model": "",
+                    "from_port": "out5",
+                    "to_port": "output"
+                }
+            ]
+        }
+    ]
+}
