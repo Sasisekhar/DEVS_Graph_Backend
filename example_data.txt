@@ -155,16 +155,16 @@
                 "Bar",
                 "Table"
             ],
-            "inports": [
-                {
-                    "name": "in2",
-                    "type": "int"
-                },
-                {
-                    "name": "in3",
-                    "type": "int"
-                }
-            ],
+                "inports": [
+                    {
+                        "name": "in2",
+                        "type": "int"
+                    },
+                    {
+                        "name": "in3",
+                        "type": "int"
+                    }
+                ],
             "outports": [
                 {
                     "name": "out5",

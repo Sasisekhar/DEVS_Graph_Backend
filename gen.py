@@ -1,5 +1,6 @@
 import json
 import functools
+import os
 
 def replaceTokens(string, map):
     for key in map:
@@ -51,8 +52,8 @@ def parseData(data:str):
         
         internalTransition = 2 * "\t" + "switch(s.phase) {\n"
         for e in model["internal_transitions"]:
-            internalTransition += (3 * "\t" + "case(" + e["curr_state"] + "):\n")
-            internalTransition += (4 * "\t" + "s.phase = " + e["new_state"] + ";\n")
+            internalTransition += (3 * "\t" + "case(" + map["_PHASE_NAME_"] + "::" + e["curr_state"] + "):\n")
+            internalTransition += (4 * "\t" + "s.phase = " + map["_PHASE_NAME_"] + "::" + e["new_state"] + ";\n")
             internalTransition += (4 * "\t" + "s.sigma = " + states[e["new_state"]] + ";\n")
             
             internalTransition += 4 * "\t" + "break;\n"
@@ -71,8 +72,8 @@ def parseData(data:str):
         for key in external_transition_per_ports:
             external_transition += "{0}if({1}->getBag().back()) {{\n".format(1*"\t", key)
             for e in external_transition_per_ports[key]:
-                external_transition += "{0}if({1}->getBag().back() == {2} && s.phase == {3}) {{\n".format(4*"\t", key, e["value"], e["curr_state"])
-                external_transition += "{0}".format(5*"\t" + "s.phase = " + e["new_state"] + ";\n")
+                external_transition += "{0}if({1}->getBag().back() == {2} && s.phase == {3}) {{\n".format(4*"\t", key, e["value"], map["_PHASE_NAME_"] + "::" +e["curr_state"])
+                external_transition += "{0}".format(5*"\t" + "s.phase = " + map["_PHASE_NAME_"] + "::" + e["new_state"] + ";\n")
                 external_transition += "{0}".format(4*"\t" + "}\n")
 
             external_transition += "{0}".format("\t\t\t}")
@@ -93,11 +94,74 @@ def parseData(data:str):
         map["_OUTPUT_"] = output
 
         # print(states)
-        atomics.append(replaceTokens(atomicTemplateFile.read(), map))
-        # return replaceTokens(atomicTemplateFile.read(), map)
-        # print()
+        atomics.append({model["name"] : replaceTokens(atomicTemplateFile.read(), map)})
+
+    ####################################################
+    coupledMap = {}
+    coupledMap["_COUPLED_MODELS_DEFS_"] = ""
+    for model in data["coupled"]:
+        mainTemplate = open("templates/main.cpp", "r")
+        includeDef = ""
+        for a in atomics:
+            for key in a:
+                includeDef += "#include \"{0}.h\"\n".format(key)
+        coupledMap["_INCLUDES_"] = includeDef
+        
+        modelDefs = ""
+        modelDefs += "struct {0}: public Coupled {{\n".format(model["name"])
+        for port in model["inports"]:
+            modelDefs += "\tPort<{0}> {1};\n".format(port["type"], port["name"])
+
+        for port in model["outports"]:
+            modelDefs += "\tPort<{0}> {1};\n".format(port["type"], port["name"])
+        ####
+        modelDefs += "\t{0}(const std::string &id): Coupled(id){{\n".format(model["name"])
+
+        for component in model["components"]:
+             modelDefs += "\t\tauto {0} = addComponent<{1}>(\"{0}\");\n".format(component.lower(), component)
+        
+        for port in model["inports"]:
+            modelDefs += "\t\t{0} = addInPort<{1}>(\"{0}\");\n".format(port["name"], port["type"])
+
+        for port in model["outports"]:
+            modelDefs += "\t\t{0} = addOutPort<{1}>(\"{0}\");\n".format(port["name"], port["type"])
+        
+        for coupling in model["couplings"]:
+            if coupling["from_model"] == "":
+                modelDefs += "\t\taddCoupling({0}, {1});\n".format(
+                                                            coupling["from_port"],
+                                                            coupling["to_model"].lower() + "->" + coupling["to_port"])
+
+            elif coupling["to_model"] == "":
+                modelDefs += "\t\taddCoupling({0}, {1});\n".format(
+                                                            coupling["from_model"].lower() + "->" + coupling["from_port"], 
+                                                            coupling["to_port"])
+            else:
+                modelDefs += "\t\taddCoupling({0}, {1});\n".format(
+                                            coupling["from_model"].lower() + "->" + coupling["from_port"], 
+                                            coupling["to_model"].lower() + "->" + coupling["to_port"])
+                
+        ####
+        modelDefs += "\t}\n"
+        modelDefs += "};\n"
+
+        coupledMap["_COUPLED_MODELS_DEFS_"] += modelDefs
+    
+    ###############################################
+        # double processingTimeExpMean;
+        # Port<BrokerInternalMessage> inBroker;
+        # Port<vector<BrokerInternalMessage>> outBroker;
+    if not os.path.exists("tmp"):
+        os.makedirs("tmp")   
+
+    for key in a:
+        f = open("tmp/main.cpp", "w")
+        f.write(replaceTokens(mainTemplate.read(), coupledMap))
+        
     for a in atomics:
-        print(a)
+        for key in a:
+            f = open("tmp/{0}.h".format(key), "w")
+            f.write(a[key])
 
 
 data = open("example_data.txt","r").read()

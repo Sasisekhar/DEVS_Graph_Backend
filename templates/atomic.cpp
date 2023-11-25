@@ -8,12 +8,12 @@
 #endif
 
 
-enum _PHASE_NAME_
+enum class _PHASE_NAME_
 {
     _PHASE_FIELDS_
 };
 
-namespace _NAMESPACE_NAME_
+namespace cadmium::iot
 {
     struct _STATE_NAME_
     {
