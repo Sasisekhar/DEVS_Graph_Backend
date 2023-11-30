@@ -7,6 +7,10 @@
 #include <cadmium/core/modeling/atomic.hpp>
 #endif
 
+#include <cadmium/lib/iestream.hpp>
+
+
+using namespace cadmium::lib;
 
 enum class _PHASE_NAME_
 {
@@ -19,7 +23,7 @@ namespace cadmium::iot
     {
         double sigma;
         _PHASE_NAME_ phase;
-        _STATE_NAME_(_PHASE_NAME_ phase) : sigma(), phase(phase) {}
+        _STATE_NAME_(_PHASE_NAME_ phase) : sigma(inf), phase(phase) {}
     };
 
     std::ostream &operator<<(std::ostream &out, const _STATE_NAME_ &s)

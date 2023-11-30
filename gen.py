@@ -74,6 +74,8 @@ def parseData(data:str):
             for e in external_transition_per_ports[key]:
                 external_transition += "{0}if({1}->getBag().back() == {2} && s.phase == {3}) {{\n".format(4*"\t", key, e["value"], map["_PHASE_NAME_"] + "::" +e["curr_state"])
                 external_transition += "{0}".format(5*"\t" + "s.phase = " + map["_PHASE_NAME_"] + "::" + e["new_state"] + ";\n")
+                external_transition += "{0}".format(5* "\t" + "s.sigma = " + str(states[e["new_state"]]) + ";\n")
+
                 external_transition += "{0}".format(4*"\t" + "}\n")
 
             external_transition += "{0}".format("\t\t\t}")
@@ -98,6 +100,8 @@ def parseData(data:str):
 
     ####################################################
     coupledMap = {}
+    filePath = "input"
+    filePathCounter = 0
     coupledMap["_COUPLED_MODELS_DEFS_"] = ""
     for model in data["coupled"]:
         mainTemplate = open("templates/main.cpp", "r")
@@ -118,7 +122,14 @@ def parseData(data:str):
         modelDefs += "\t{0}(const std::string &id): Coupled(id){{\n".format(model["name"])
 
         for component in model["components"]:
-             modelDefs += "\t\tauto {0} = addComponent<{1}>(\"{0}\");\n".format(component.lower(), component)
+             
+            if component == "IEStream":
+                modelDefs += "\t\tauto filePath = \"{0}.txt\";\n".format(filePath + str(filePathCounter))
+                modelDefs += "\t\tauto {0} = addComponent<{1}<{3}>>(\"{0}\", {2});\n".format(component.lower(), component, "filePath", "int")
+                filePathCounter += 1
+            else:
+                modelDefs += "\t\tauto {0} = addComponent<{1}>(\"{0}\");\n".format(component.lower(), component)
+
         
         for port in model["inports"]:
             modelDefs += "\t\t{0} = addInPort<{1}>(\"{0}\");\n".format(port["name"], port["type"])
