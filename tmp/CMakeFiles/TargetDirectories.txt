@@ -1,0 +1,5 @@
+/home/afx/code/approject/tmp/CMakeFiles/main.dir
+/home/afx/code/approject/tmp/CMakeFiles/run.dir
+/home/afx/code/approject/tmp/CMakeFiles/run_test.dir
+/home/afx/code/approject/tmp/CMakeFiles/edit_cache.dir
+/home/afx/code/approject/tmp/CMakeFiles/rebuild_cache.dir

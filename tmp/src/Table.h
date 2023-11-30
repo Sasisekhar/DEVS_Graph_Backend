@@ -7,6 +7,10 @@
 #include <cadmium/core/modeling/atomic.hpp>
 #endif
 
+#include <cadmium/lib/iestream.hpp>
+
+
+using namespace cadmium::lib;
 
 enum class TablePhase
 {
@@ -20,7 +24,7 @@ namespace cadmium::iot
     {
         double sigma;
         TablePhase phase;
-        TableState(TablePhase phase) : sigma(), phase(phase) {}
+        TableState(TablePhase phase) : sigma(std::numeric_limits<double>::infinity()), phase(phase) {}
     };
 
     std::ostream &operator<<(std::ostream &out, const TableState &s)
@@ -57,6 +61,7 @@ namespace cadmium::iot
 			if(in5->getBag().back()) {
 				if(in5->getBag().back() == 1 && s.phase == TablePhase::idle) {
 					s.phase = TablePhase::ready;
+					s.sigma = 15;
 				}
 			}
         }

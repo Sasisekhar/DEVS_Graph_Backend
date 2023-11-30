@@ -7,6 +7,10 @@
 #include <cadmium/core/modeling/atomic.hpp>
 #endif
 
+#include <cadmium/lib/iestream.hpp>
+
+
+using namespace cadmium::lib;
 
 enum class BarPhase
 {
@@ -20,7 +24,7 @@ namespace cadmium::iot
     {
         double sigma;
         BarPhase phase;
-        BarState(BarPhase phase) : sigma(), phase(phase) {}
+        BarState(BarPhase phase) : sigma(std::numeric_limits<double>::infinity()), phase(phase) {}
     };
 
     std::ostream &operator<<(std::ostream &out, const BarState &s)
@@ -57,6 +61,7 @@ namespace cadmium::iot
 			if(in4->getBag().back()) {
 				if(in4->getBag().back() == 1 && s.phase == BarPhase::idle) {
 					s.phase = BarPhase::ready;
+					s.sigma = 4;
 				}
 			}
         }

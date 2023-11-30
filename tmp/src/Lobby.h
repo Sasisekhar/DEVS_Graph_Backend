@@ -7,6 +7,10 @@
 #include <cadmium/core/modeling/atomic.hpp>
 #endif
 
+#include <cadmium/lib/iestream.hpp>
+
+
+using namespace cadmium::lib;
 
 enum class LobbyPhase
 {
@@ -21,7 +25,7 @@ namespace cadmium::iot
     {
         double sigma;
         LobbyPhase phase;
-        LobbyState(LobbyPhase phase) : sigma(), phase(phase) {}
+        LobbyState(LobbyPhase phase) : sigma(std::numeric_limits<double>::infinity()), phase(phase) {}
     };
 
     std::ostream &operator<<(std::ostream &out, const LobbyState &s)
@@ -64,9 +68,11 @@ namespace cadmium::iot
 			if(in1->getBag().back()) {
 				if(in1->getBag().back() == 1 && s.phase == LobbyPhase::idle) {
 					s.phase = LobbyPhase::bar;
+					s.sigma = 5;
 				}
 				if(in1->getBag().back() == 2 && s.phase == LobbyPhase::idle) {
 					s.phase = LobbyPhase::table;
+					s.sigma = 7;
 				}
 			}
         }

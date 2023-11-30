@@ -8,6 +8,7 @@
 #include "Table.h"
 
 using namespace std;
+using namespace cadmium::lib;
 
 namespace cadmium::iot {
 
@@ -32,7 +33,8 @@ struct top_model: public Coupled {
 	top_model(const std::string &id): Coupled(id){
 		auto lobby = addComponent<Lobby>("lobby");
 		auto restaurant = addComponent<Restaurant>("restaurant");
-		auto iestream = addComponent<IEStream>("iestream");
+		auto filePath = "input0.txt";
+		auto iestream = addComponent<IEStream<int>>("iestream", filePath);
 		output = addOutPort<int>("output");
 		addCoupling(lobby->out1, restaurant->in2);
 		addCoupling(lobby->out2, restaurant->in3);
@@ -47,12 +49,13 @@ struct top_model: public Coupled {
 using namespace cadmium::iot;
 
 int main() {
+  
     auto model = make_shared<top_model>("top");
     auto rootCoordinator = cadmium::RootCoordinator(model);
     auto logger = make_shared<cadmium::CSVLogger>("log.csv", ";");
     rootCoordinator.setLogger(logger);
     rootCoordinator.start();
-    rootCoordinator.simulate(std::numeric_limits<double>::std::numeric_limits<double>::infinity()inity());
+    rootCoordinator.simulate(10.0);
     rootCoordinator.stop();
     return 0;
 }
