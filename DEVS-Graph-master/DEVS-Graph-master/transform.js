@@ -6,7 +6,7 @@ function generate() {
     
     let data = transformData(save());
     console.log(data);
-    fetch('http://localhost:8080/cadmium/generate', {
+    fetch('http://127.0.0.1:5000/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -1,6 +1,12 @@
 import json
+import zipfile
 import functools
 import os
+from flask import Flask, send_from_directory, request
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
 
 def replaceTokens(string, map):
     for key in map:
@@ -8,6 +14,14 @@ def replaceTokens(string, map):
     
     string = string.replace("inf", "std::numeric_limits<double>::infinity()")
     return string
+
+def zip_folder(folder_path, output_path):
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, folder_path)
+                zipf.write(file_path, arcname)
 
 def parseData(data:str):
     # print(data)
@@ -159,24 +173,32 @@ def parseData(data:str):
         coupledMap["_COUPLED_MODELS_DEFS_"] += modelDefs
     
     ###############################################
-        # double processingTimeExpMean;
-        # Port<BrokerInternalMessage> inBroker;
-        # Port<vector<BrokerInternalMessage>> outBroker;
-    if not os.path.exists("tmp"):
-        os.makedirs("tmp")   
+    if not os.path.exists("output"):
+        os.makedirs("output")   
 
     for key in a:
-        f = open("tmp/main.cpp", "w")
+        f = open("output/main.cpp", "w")
         f.write(replaceTokens(mainTemplate.read(), coupledMap))
         
     for a in atomics:
         for key in a:
-            f = open("tmp/{0}.h".format(key), "w")
+            f = open("output/{0}.h".format(key), "w")
             f.write(a[key])
+    
+    zip_folder("output", "output.zip")
 
 
 data = open("example_data.txt","r").read()
 
 print(parseData(json.loads(data)))
 
-# print(json.loads(f)['top'])
+
+@app.route("/", methods=['POST'])
+def root():
+    print(request.data)
+    parseData(json.loads(request.data))
+    
+    return send_from_directory("./", "output.zip")
+
+if __name__ == '__main__':
+    app.run()
