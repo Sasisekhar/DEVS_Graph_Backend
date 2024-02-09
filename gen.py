@@ -195,6 +195,7 @@ print(parseData(json.loads(data)))
 
 @app.route("/", methods=['POST'])
 def root():
+    print("Here?")
     print(request.data)
     parseData(json.loads(request.data))
     
