@@ -193,7 +193,7 @@ data = open("example_data.txt","r").read()
 print(parseData(json.loads(data)))
 
 
-@app.route("/", methods=['POST'])
+@app.route("/generate-cadmium", methods=['POST'])
 def root():
     print("Here?")
     print(request.data)
@@ -202,4 +202,4 @@ def root():
     return send_from_directory("./", "output.zip")
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="127.0.0.1", port=5000)
